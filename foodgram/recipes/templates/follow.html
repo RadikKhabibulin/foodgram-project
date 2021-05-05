@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Мои подписки{% endblock %}
+{% load static %}
+{% block content %}
+{% load user_filters %}
+
+<link rel="stylesheet" href="{% static 'pages/myFollow.css' %}">
+
+    <div class="main__header">
+        <h1 class="main__title">Мои подписки</h1>
+    </div>
+    
+    <div class="card-list">
+        {% for author, recipes in recipe_dict.items %}
+            <div class="card-user" data-author="{{ author.username }}">
+                <div class="card-user__header">
+                    <h2 class="card-user__title">{{ author.first_name }} {{ author.last_name }}</h2>
+                </div>
+                <div class="card-user__body">
+                    <ul class="card-user__items">
+                        {% for recipe in recipes %}
+                            {% if forloop.counter == 4 %}
+                                <li class="card-user__item">
+                                    <a href="{% url 'profile' author.username %}" class="card-user__link link">Еще {{ recipe }} ...</a>
+                                </li>
+                            {% else %}
+                                <li class="card-user__item">
+                                    <div class="recipe">
+                                        {% load thumbnail %}
+                                        {% thumbnail recipe.image "200x1200" upscale=True as im %}
+                                            <img src="{{ im.url }}" alt="{{ recipe.title }}" class="recipe__image">
+                                        {% endthumbnail %}
+                                        <h3 class="recipe__title">{{ recipe.title }}</h3>
+                                        <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cooking_time }} мин.</p>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-user__footer">
+                    {% csrf_token %}
+                    <button class="button button_style_light-blue button_size_auto" name="subscribe">Отписаться</button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page.has_other_pages %}
+        {% include "paginator.html" with items=page paginator=paginator%}
+    {% endif %}
+
+<script src="{% static 'js/config/config.js' %}"></script>
+<script src="{% static 'js/components/MainCards.js' %}"></script>
+<script src="{% static 'js/components/MyFollow.js' %}"></script>
+<script src="{% static 'js/components/Subscribe.js' %}"></script>
+<script src="{% static 'js/components/Header.js' %}"></script>
+<script src="{% static 'js/api/Api.js' %}"></script>
+<script src="{% static 'myFollow.js' %}"></script>
+
+{% endblock %}
