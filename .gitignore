@@ -27,7 +27,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 sent_emails/
-shop_list/
+shop_lists/
+.vscode/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
