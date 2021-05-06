@@ -1,11 +1,5 @@
 {% extends "base.html" %}
-{% block title %}
-    {% if recipe.id %}
-        Редактирование рецепта
-    {% else %}
-        Создание рецепта
-    {% endif %}
-{% endblock %}
+{% block title %}{% if recipe.id %}Редактирование рецепта{% else %}Создание рецепта{% endif %}{% endblock %}
 {% load static %}
 {% block content %}
 {% load user_filters %}

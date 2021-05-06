@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ recipe.title }}{% endblock %}
+{% block title %}Рецепты{% endblock %}
 {% load static %}
 {% block content %}
     <link rel="stylesheet" href="{% static 'pages/single.css' %}">
@@ -46,9 +46,14 @@
                     </ul>
                 </div>
                 <ul class="single-card__items">
-                    <li class="single-card__item"><button class="button button_style_blue" name="purchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
+                    {% if user.is_authenticated %}
+                        {% if purchases %}
+                            <li class="single-card__item"><button class="button button_style_light-blue-outline" name="purchases"><span class="icon-check button__icon"></span> Рецепт добавлен</button></li>
+                        {% else %}
+                            <li class="single-card__item"><button class="button button_style_blue" name="purchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
+                        {% endif %}
+                    {% endif %}
                     {% if user.is_authenticated and user != recipe.author %}
-                        
                         {% if following %}
                             <li class="single-card__item"><button class="button button_style_light-blue button_size_subscribe" name="subscribe">Отписаться от автора</button></li>
                         {% else %}

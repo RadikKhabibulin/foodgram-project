@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 #     }
 # }
 DATABASES = {
-    'default': env.db(), # описываем, где искать настройки доступа к базе
+    'default': env.db(),
 }
 
 # Password validation

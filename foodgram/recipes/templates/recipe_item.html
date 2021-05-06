@@ -7,7 +7,7 @@
     <div class="card__body">
         <a class="card__title link" href="{% url 'recipe' recipe.author.username recipe.id %}" target="_blank">{{ recipe.title }}</a>
         <ul class="card__items">
-            {% for key, value in tag_dict.items %}
+            {% for key, value in param_dict.items %}
                 {% if key == recipe.id %}
                     {% if 'Завтрак' in value %}
                         <li class="card__item"><span class="badge badge_style_orange">Завтрак</span></li>
@@ -27,9 +27,13 @@
         </div>
     </div>
     <div class="card__footer">
-        <button class="button button_style_light-blue" name="purchases" data-out><span class="icon-plus button__icon"></span>Добавить в покупки</button>
-        {% for key, value in tag_dict.items %}
+        {% for key, value in param_dict.items %}
             {% if key == recipe.id %}
+                {% if 'add-purchases' in value %}
+                    <button class="button button_style_light-blue" name="purchases" data-out><span class="icon-plus button__icon"></span>Добавить в покупки</button>
+                {% elif 'del-purchases' in value %}
+                    <button class="button button_style_light-blue-outline" name="purchases"><span class="icon-check button__icon"></span> Рецепт добавлен</button>
+                {% endif %}
                 {% if 'add-favorites' in value %}
                     <button class="button button_style_none" name="favorites" data-out><span class="icon-favorite"></span></button>
                 {% elif 'del-favorites' in value %}

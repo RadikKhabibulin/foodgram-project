@@ -3,25 +3,37 @@
         <div class="nav__container container">
             <ul class="nav__items list">
                 {% if user.is_authenticated %}
-                    <li class="nav__item"><a href="{% url 'index' %}" class="nav__link link">Рецепты</a></li>
-                    <li class="nav__item"><a href="{% url 'follow_index' %}" class="nav__link link">Мои подписки</a></li>
-                    <li class="nav__item"><a href="{% url 'new_recipe' %}" class="nav__link link">Создать рецепт</a></li>
-                    <li class="nav__item"><a href="{% url 'favorites' %}" class="nav__link link">Избранное</a></li>
-                    <li class="nav__item"><a href="{% url 'index' %}" class="nav__link link">Список покупок</a></li><span class="badge badge_style_blue nav__badge" id="counter"></span>
+                    <li class="nav__item" id="Рецепты"><a href="{% url 'index' %}" class="nav__link link">Рецепты</a></li>
+                    <li class="nav__item" id="Мои подписки"><a href="{% url 'follow_index' %}" class="nav__link link">Мои подписки</a></li>
+                    <li class="nav__item" id="Создание рецепта"><a href="{% url 'new_recipe' %}" class="nav__link link">Создать рецепт</a></li>
+                    <li class="nav__item" id="Избранное"><a href="{% url 'favorites' %}" class="nav__link link">Избранное</a></li>
+                    <li class="nav__item" id="Список покупок"><a href="{% url 'purchases' %}" class="nav__link link">Список покупок</a></li><span class="badge badge_style_blue nav__badge" id="counter">{% if purchases_count > 0 %} {{ purchases_count }} {% endif %}</span>
                 {% else %}
-                    <li class="nav__item nav__item_disabled"><a href="{% url 'index' %}" class="nav__link link">Рецепты</a></li>
-                    <li class="nav__item nav__item_disabled"><a href="{% url 'index' %}" class="nav__link link">Список покупок</a><span class="badge badge_style_blue nav__badge" id="counter"></span></li>
+                    <li class="nav__item nav__item_disabled" id="Рецепты"><a href="{% url 'index' %}" class="nav__link link">Рецепты</a></li>
+                    <li class="nav__item nav__item_disabled" id="Список покупок"><a href="{% url 'purchases' %}" class="nav__link link">Список покупок</a><span class="badge badge_style_blue nav__badge" id="counter"></span></li>
                 {% endif %}
             </ul>
             <ul class="nav__items list">
                 {% if user.is_authenticated %}
-                    <li class="nav__item"><a href="{% url 'password_change' %}" class="nav__link link">Изменить пароль</a></li>
+                    <li class="nav__item" id="Новый пароль"><a href="{% url 'password_change' %}" class="nav__link link">Изменить пароль</a></li>
                     <li class="nav__item"><a href="{% url 'logout' %}" class="nav__link link">Выход</a></li>
                 {% else %}
-                    <li class="nav__item"><a href="{% url 'login' %}" class="nav__link link">Войти</a></li>
-                    <li class="nav__item"><a href="{% url 'signup' %}" class="button button_style_blue">Создать аккаунт</a></li>
+                    <li class="nav__item" id="Войти на сайт"><a href="{% url 'login' %}" class="nav__link link">Войти</a></li>
+                    <li class="nav__item"><a href="{% url 'signup' %}" class="button button_style_blue"style="padding-top:15px" >Создать аккаунт</a></li>
                 {% endif %}
             </ul>
+            <script>
+                var title_name = document.getElementsByTagName('title')[0].text;
+                if (document.getElementById(title_name)){
+                    document.getElementById(title_name).classList.remove('nav__item_disabled');
+                    document.getElementById(title_name).classList.add('nav__item_active');
+                }
+            </script>
+            <div style="display: none" id="purchases_count">{{purchases_count}}</div>
+            <script>
+                var purchases_count = document.getElementById('purchases_count').innerText
+                // document.getElementById('counter').innerText = purchases_count;
+            </script>
         </div>
     </nav>
 </header>

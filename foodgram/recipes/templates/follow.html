@@ -27,7 +27,7 @@
                                 <li class="card-user__item">
                                     <div class="recipe">
                                         {% load thumbnail %}
-                                        {% thumbnail recipe.image "200x1200" upscale=True as im %}
+                                        {% thumbnail recipe.image "90x90" upscale=True as im %}
                                             <img src="{{ im.url }}" alt="{{ recipe.title }}" class="recipe__image">
                                         {% endthumbnail %}
                                         <h3 class="recipe__title">{{ recipe.title }}</h3>

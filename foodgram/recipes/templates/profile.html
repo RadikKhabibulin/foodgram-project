@@ -7,21 +7,7 @@
     <div class="main__header">
         <h1 class="main__title">{{ profile.first_name }} {{ profile.last_name }}</h1>
         <ul class="tags">
-            {% if tag %}
-                <li class="tags__item"><a href="{% url 'profile' profile.username %}" class="nav__link link">Сбросить фильтр "{{tag}}"</a></li>
-            {% endif %}
-            <li class="tags__item">
-                <a id="breakfast" class="tags__checkbox tags__checkbox_style_orange tags__checkbox_active" href="{% url 'profile_tag' profile.username 'breakfast' %}"></a>
-                <span class="tags__label">Завтрак</span>
-            </li>
-            <li class="tags__item">
-                <a id="lunch" class="tags__checkbox tags__checkbox_style_green tags__checkbox_active" href="{% url 'profile_tag' profile.username 'lunch' %}"></a>
-                <span for="lunch" class="tags__label">Обед</span>
-            </li>
-            <li class="tags__item">
-                <a id="dinner" class="tags__checkbox tags__checkbox_style_purple tags__checkbox_active" href="{% url 'profile_tag' profile.username 'dinner' %}"></a>
-                <label for="dinner" class="tags__label">Ужин</label>
-            </li>
+            {% include 'tags.html' with tags=tags url='profile' url_tag='profile_tag' username=username %}
         </ul>
     </div>
     <h3 class="main__title" style="font-size: large; margin-top: -30px;">Опубликовано рецептов: {{ recipes_count }}</h3>
@@ -37,7 +23,7 @@
     </div>
     <div class="card-list">
         {% for recipe in page %}
-            {% include "recipe_item.html" with recipe=recipe tag_dict=tag_dict %}
+            {% include "recipe_item.html" with recipe=recipe param_dict=param_dict %}
         {% endfor %}
     </div>
 

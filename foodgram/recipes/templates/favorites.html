@@ -4,27 +4,11 @@
 {% block content %}
         <div class="main__header">
             <h1 class="main__title">Избранное</h1>
-            <ul class="tags">
-                {% if tag %}
-                    <li class="tags__item"><a href="{% url 'favorites' %}" class="nav__link link">Сбросить фильтр "{{tag}}"</a></li>
-                {% endif %}
-                <li class="tags__item">
-                    <a id="breakfast" class="tags__checkbox tags__checkbox_style_orange tags__checkbox_active" href="{% url 'favorites_tag' 'breakfast' %}"></a>
-                    <span class="tags__label">Завтрак</span>
-                </li>
-                <li class="tags__item">
-                    <a id="lunch" class="tags__checkbox tags__checkbox_style_green tags__checkbox_active" href="{% url 'favorites_tag' 'lunch' %}"></a>
-                    <span for="lunch" class="tags__label">Обед</span>
-                </li>
-                <li class="tags__item">
-                    <a id="dinner" class="tags__checkbox tags__checkbox_style_purple tags__checkbox_active" href="{% url 'favorites_tag' 'dinner' %}"></a>
-                    <label for="dinner" class="tags__label">Ужин</label>
-                </li>
-            </ul>
+            {% include "tags.html" with tags=tags url='favorites' url_tag='favorites_tag' %}
         </div>
         <div class="card-list">
             {% for recipe in page %}
-                {% include "recipe_item.html" with recipe=recipe tag_dict=tag_dict %}
+                {% include "recipe_item.html" with recipe=recipe param_dict=param_dict %}
             {% endfor %}
         </div>
 

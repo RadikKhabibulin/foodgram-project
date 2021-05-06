@@ -1,0 +1,53 @@
+{% load recipe_filters %}
+
+<ul class="tags">
+    {% if tags %}
+        <li class="tags__item"><a href="{% if username %} {% url url username %} {% else %} {% url url %} {% endif %}" class="nav__link link">Сбросить фильтр</a></li>
+        <li class="tags__item">
+            {% if 'breakfast' in tags %}
+                <a id="breakfast" class="tags__checkbox tags__checkbox_style_orange tags__checkbox_active"
+                href="{% if username %} {% url url_tag username tags|del_tag:'breakfast' %} {% else %} {% url url_tag tags|del_tag:'breakfast' %} {% endif %}"></a>
+            {% else %}
+                <a id="breakfast" class="tags__checkbox tags__checkbox_style_orange" 
+                href="{% if username %} {% url url_tag username 'breakfast+'|add:tags %} {% else %} {% url url_tag 'breakfast+'|add:tags %} {% endif %}"></a>
+            {% endif %}
+            <span for="breakfast" class="tags__label">Завтрак</span>
+        </li>
+        <li class="tags__item">
+            {% if 'lunch' in tags %}
+                <a id="lunch" class="tags__checkbox tags__checkbox_style_green tags__checkbox_active" 
+                href="{% if username %} {% url url_tag username tags|del_tag:'lunch' %} {% else %} {% url url_tag tags|del_tag:'lunch' %} {% endif %}"></a>
+            {% else %}
+                <a id="lunch" class="tags__checkbox tags__checkbox_style_green" 
+                href="{% if username %} {% url url_tag username 'lunch+'|add:tags %} {% else %} {% url url_tag 'lunch+'|add:tags %} {% endif %}"></a>
+            {% endif %}
+            <span for="lunch" class="tags__label">Обед</span>
+        </li>
+        <li class="tags__item">
+            {% if 'dinner' in tags %}
+                <a id="dinner" class="tags__checkbox tags__checkbox_style_purple tags__checkbox_active" 
+                href="{% if username %} {% url url_tag username tags|del_tag:'dinner' %} {% else %} {% url url_tag tags|del_tag:'dinner' %} {% endif %}"></a>
+            {% else %}
+                <a id="dinner" class="tags__checkbox tags__checkbox_style_purple" 
+                href="{% if username %} {% url url_tag username 'dinner+'|add:tags %} {% else %} {% url url_tag 'dinner+'|add:tags %} {% endif %}"></a>
+            {% endif %}
+            <label for="dinner" class="tags__label">Ужин</label>
+        </li>
+    {% else %}
+        <li class="tags__item">
+            <a id="breakfast" class="tags__checkbox tags__checkbox_style_orange" 
+            href="{% if username %} {% url url_tag  username 'breakfast' %} {% else %} {% url url_tag 'breakfast' %} {% endif %}"></a>
+            <span for="breakfast" class="tags__label">Завтрак</span>
+        </li>
+        <li class="tags__item">
+            <a id="lunch" class="tags__checkbox tags__checkbox_style_green" 
+            href="{% if username %} {% url url_tag  username 'lunch' %} {% else %} {% url url_tag 'lunch' %} {% endif %}"></a>
+            <span for="lunch" class="tags__label">Обед</span>
+        </li>
+        <li class="tags__item">
+            <a id="dinner" class="tags__checkbox tags__checkbox_style_purple" 
+            href="{% if username %} {% url url_tag  username 'dinner' %} {% else %} {% url url_tag 'dinner' %} {% endif %}"></a>
+            <label for="dinner" class="tags__label">Ужин</label>
+        </li>
+    {% endif %}
+</ul>
