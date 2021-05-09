@@ -27,7 +27,9 @@ function Ingredients() {
     // клик по элементам с сервера
     const dropdown = (e) => {
         if (e.target.classList.contains('form__item-list')) {
-            nameIngredient.value = e.target.textContent;
+            var title = e.target.textContent.length;
+            var unit = e.target.getAttribute('data-val').length + 3;
+            nameIngredient.value = e.target.textContent.substr(0, title - unit);
             formDropdownItems.style.display = ''
             cantidadVal.textContent = e.target.getAttribute('data-val');
         }
@@ -85,7 +87,7 @@ const cbEventInput = (elem) => {
     return api.getIngredients(elem.target.value).then( e => {
         if(e.length !== 0 ) {
             const items = e.map( elem => {
-                return `<a class="form__item-list" data-val="${elem.dimension}"">${elem.title}</a>`
+                return `<a class="form__item-list" data-val="${elem.dimension}"">${elem.title} (${elem.dimension})</a>`
             }).join(' ')
             formDropdownItems.style.display = 'flex';
             formDropdownItems.innerHTML = items;
