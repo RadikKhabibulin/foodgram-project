@@ -119,19 +119,27 @@
             </div>
             <div class="form__group">
                 <span class="form__label">Загрузить фото</span>
-                <div class="form__field-group">
-                    <!-- {{ form.image }} -->
+                <div class="form__field-group" id="image_field">
+                    {% if file_url %}
+                        <input type="checkbox" name="image-clear" style="display: none;" id="image-clear_id">
+                        <img id="blah" src="{{ file_url }}" alt="your image" width="50" height="50" style="display: inline-block; margin-left: 200px; position: absolute;"/>
+                        <label for="image-clear_id" class="form__field-item-delete" id="del-image" style="margin-left: 260px; position: absolute;" onclick="del_image()"></label>
+                        <input type="file" name="image" accept="image/*" class="form__file" id="id_image">
+                    {% else %}
+                        {{ form.image|addclass:"form__file" }}
+                        <img id="blah" src="#" alt="your image" width="50" height="50" style="display: none; margin-left: 200px; position: absolute;"/>
+                        <span class="form__field-item-delete" id="del-image" style="display: none; margin-left: 260px; position: absolute;" onclick="del_image()"></span>
+                    {% endif %}
                     <label for="id_image" class="form__file-button">Выбрать файл</label>
-                    {{ form.image|addclass:"form__file" }}
                     {% for error in form.image.errors %}
                         <span class="form__error">{{ error }}</span>
                     {% endfor %}
                 </div>
-            </div>
+            </div>           
             <div class="form__footer">
                 {% if recipe.id %}
                     <button type="submit" class="button button_style_blue">Сохранить</button>
-                    <a style="margin-left: 2.5em" href="{% url 'recipe_del' recipe.author.username recipe.id%}" class="form__ingredient-link">Удалить</a>
+                    <a style="margin-left: 2.5em" href="{% url 'recipe_del' recipe.author.username recipe.id%}" onclick="return confirm('Удалить рецепт?') ? true : false;" class="form__ingredient-link">Удалить</a>
                 {% else %}
                     <button type="submit" class="button button_style_blue">Создать рецепт</button>
                 {% endif %}
@@ -139,9 +147,45 @@
         </form>
     </div>
 
+
+
 <script src="{% static 'js/config/config.js' %}"></script>
 <script src="{% static 'js/components/Header.js' %}"></script>
 <script src="{% static 'js/utils/debouncing.js' %}"></script>
 <script src="{% static 'js/api/Api.js' %}"></script>
 <script src="{% static 'formRecipe.js' %}"></script>
+<script src="{% static 'jquery.min.js' %}"></script>
+<script>
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+            console.log(e.target.result)
+            document.getElementById('blah').src=e.target.result;
+            document.getElementById('blah').style.display = 'inline-block';
+            document.getElementById('del-image').style.display = 'inline-block';
+            }
+            
+            reader.readAsDataURL(input.files[0]); // convert to base64 string
+        }
+        else {
+            document.getElementById('blah').style.display = 'none';
+            document.getElementById('del-image').style.display = 'none';
+        }
+    }
+
+    $("#id_image").change(function() {
+        readURL(this);
+    });
+
+    function del_image(){
+        console.log('click')
+        var input=document.getElementById("id_image");
+        input.value = '';
+        document.getElementById('blah').style.display = 'none';
+        document.getElementById('del-image').style.display = 'none';
+    }
+</script>
+
 {% endblock %}

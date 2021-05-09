@@ -1,4 +1,4 @@
-from .models import Recipe, Ingredient, Tag, Composition
+from .models import Recipe, Composition
 from django.forms import ModelForm
 from django.utils.translation import gettext_lazy as _
 
@@ -6,7 +6,10 @@ from django.utils.translation import gettext_lazy as _
 class RecipeForm(ModelForm):
     class Meta:
         model = Recipe
-        fields = ('title', 'tag', 'ingredient', 'cooking_time', 'description', 'image')
+        fields = (
+            'title', 'tag', 'ingredient',
+            'cooking_time', 'description', 'image'
+        )
         labels = {
             'title': _('Название рецепта'),
             'tag': _('Тэги'),

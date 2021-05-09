@@ -1,5 +1,4 @@
 from django.contrib import admin
-# from django.contrib.auth import get_user_model
 
 from .models import (
     Ingredient, Tag, Recipe, Composition,
@@ -7,13 +6,6 @@ from .models import (
 )
 
 
-# User = get_user_model()
-
-
-# class UserAdmin(admin.ModelAdmin):
-#     list_display = ('pk', 'username', 'email')
-#     search_fields = ('username',)
-#     list_filter = ('username', 'email',)
 class CompositionInline(admin.TabularInline):
     model = Composition
     extra = 1
@@ -30,7 +22,7 @@ admin.site.register(Tag, TagAdmin)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'unit',)
     search_fields = ('name',)
-    list_filter = ('name',)
+    list_filter = ('unit',)
 
 
 admin.site.register(Ingredient, IngredientAdmin)
@@ -48,7 +40,8 @@ admin.site.register(Recipe, RecipeAdmin)
 
 class CompositionAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'number',)
-    search_fields = ('recipe__title',)
+    search_fields = ('ingredient__name',)
+    list_filter = ('recipe__title',)
 
 
 admin.site.register(Composition, CompositionAdmin)
@@ -56,7 +49,8 @@ admin.site.register(Composition, CompositionAdmin)
 
 class FollowAdmin(admin.ModelAdmin):
     list_display = ('user', 'author',)
-    search_fields = ('author',)
+    search_fields = ('user__username',)
+    list_filter = ('author',)
 
 
 admin.site.register(Follow, FollowAdmin)
@@ -64,7 +58,8 @@ admin.site.register(Follow, FollowAdmin)
 
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe',)
-    search_fields = ('user',)
+    search_fields = ('recipe__title',)
+    list_filter = ('user',)
 
 
 admin.site.register(Favorite, FavoriteAdmin)

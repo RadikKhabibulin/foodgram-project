@@ -16,7 +16,7 @@
             <ul class="nav__items list">
                 {% if user.is_authenticated %}
                     <li class="nav__item" id="Новый пароль"><a href="{% url 'password_change' %}" class="nav__link link">Изменить пароль</a></li>
-                    <li class="nav__item"><a href="{% url 'logout' %}" class="nav__link link">Выход</a></li>
+                    <li class="nav__item"><a href="{% url 'logout' %}" onclick="return confirm('Выйти из аккаунта?') ? true : false;" class="nav__link link">Выход</a></li>
                 {% else %}
                     <li class="nav__item" id="Войти на сайт"><a href="{% url 'login' %}" class="nav__link link">Войти</a></li>
                     <li class="nav__item"><a href="{% url 'signup' %}" class="button button_style_blue"style="padding-top:15px" >Создать аккаунт</a></li>
@@ -28,12 +28,7 @@
                     document.getElementById(title_name).classList.remove('nav__item_disabled');
                     document.getElementById(title_name).classList.add('nav__item_active');
                 }
-            </script>
-            <div style="display: none" id="purchases_count">{{purchases_count}}</div>
-            <script>
-                var purchases_count = document.getElementById('purchases_count').innerText
-                // document.getElementById('counter').innerText = purchases_count;
-            </script>
+            </script> 
         </div>
     </nav>
 </header>

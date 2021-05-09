@@ -1,3 +1,4 @@
+import os
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import (
     render,
@@ -183,6 +184,10 @@ def recipe_edit(request, username, recipe_id):
         request.POST or None, files=request.FILES or None,
         instance=editable_recipe
     )
+    if form.initial['image']:
+        file_url = form.initial['image'].url
+    else:
+        file_url = None
     if form.is_valid():
         new_recipe = form.save(commit=False)
         new_compositions, new_tags = request_parsing(
@@ -196,7 +201,7 @@ def recipe_edit(request, username, recipe_id):
             return render(request, 'new_recipe.html', {
                     'form': form, 'compositions': new_compositions,
                     'tags': new_tags, 'errors': errors,
-                    'purchases_count': purchases_count,
+                    'purchases_count': purchases_count, 'file_url': file_url,
                 }
             )
         new_recipe.save()
@@ -212,7 +217,7 @@ def recipe_edit(request, username, recipe_id):
             'form': form, 'recipe_id': recipe_id,
             'username': username, 'recipe': editable_recipe,
             'compositions': compositions, 'tags': tags,
-            'purchases_count': purchases_count,
+            'purchases_count': purchases_count, 'file_url': file_url,
         }
     )
 
@@ -239,12 +244,13 @@ def follow_index(request):
         for recipe in follow.author.recipes.all()[:3]:
             recipe_list.append(recipe)
         if recipes_count > 3:
-            if (recipes_count - 3) == 1:
-                recipe_list.append(str(recipes_count - 3) + ' рецепт')
-            elif 1 < (recipes_count - 3) < 5:
-                recipe_list.append(str(recipes_count - 3) + ' рецепта')
+            new_count = recipes_count - 3
+            if (new_count % 10) == 1:
+                recipe_list.append(str(new_count) + ' рецепт')
+            elif 1 < (new_count % 10) < 5:
+                recipe_list.append(str(new_count) + ' рецепта')
             else:
-                recipe_list.append(str(recipes_count - 3) + ' рецептов')
+                recipe_list.append(str(new_count) + ' рецептов')
         recipe_dict[follow.author] = recipe_list
     paginator = Paginator(following, 6)
     page_number = request.GET.get('page')
@@ -396,19 +402,24 @@ def request_parsing(new_recipe, request, edit=False):
             value = request.POST.get(
                 value_ingredient + item[len(name_ingredient):]
             )
-            ingredient = get_object_or_404(
-                Ingredient, name=name, unit=unit)
-            if edit:
-                composition, created = Composition.objects.get_or_create(
-                    ingredient=ingredient,
-                    number=value, recipe=new_recipe
+            ingredient = Ingredient.objects.filter(
+                name=name, unit=unit
+            ).exists()
+            if ingredient:
+                ingredient = get_object_or_404(
+                    Ingredient, name=name, unit=unit
                 )
-            else:
-                composition = Composition(
-                    ingredient=ingredient,
-                    number=value, recipe=new_recipe
-                )
-            new_compositions.append(composition)
+                if edit:
+                    composition, created = Composition.objects.get_or_create(
+                        ingredient=ingredient,
+                        number=value, recipe=new_recipe
+                    )
+                else:
+                    composition = Composition(
+                        ingredient=ingredient,
+                        number=value, recipe=new_recipe
+                    )
+                new_compositions.append(composition)
         if item in tag_slugs:
             new_tag = get_object_or_404(Tag, slug=item)
             new_tags.append(new_tag)
@@ -419,17 +430,14 @@ def add_ingredient(request):
     ingredients = get_list_or_404(Ingredient)
     search_name = request.GET.get('query')
     data = []
-    # if search_name != '':
-    #     for item in ingredients:
-    #         if search_name.lower() in item.name.lower():
-    #             ingredient = {'title': item.name, 'dimension': item.unit}
-    #             data.append(ingredient)
     for item in ingredients:
         if search_name.lower() in item.name.lower():
             ingredient = {'title': item.name, 'dimension': item.unit}
             data.append(ingredient)
-    # if len(data) == 0:
-    #     data = [{'title': 'Ингредиент не найден', 'dimension': 'шт'}]
+    if len(data) == 0:
+        for item in ingredients:
+            ingredient = {'title': item.name, 'dimension': item.unit}
+            data.append(ingredient)
     return JsonResponse(data, safe=False)
 
 
@@ -464,21 +472,35 @@ def upload_file(request):
     user = request.user
     purchases = user.buyer.all()
     recipes = [item.recipe for item in purchases]
-    filename = ('shop_lists/' + user.username + '.txt')
-    shop_file = open(filename, 'w')
-    shop_list = {}
+    shop_dict = {}
     for recipe in recipes:
         compositions = Composition.objects.filter(recipe=recipe)
         for item in compositions:
             title = (item.ingredient.name + ' (' + item.ingredient.unit + ')')
             number = item.number
-            if (title) in shop_list.keys():
-                shop_list[title] = shop_list[title] + number
+            if title in shop_dict.keys():
+                shop_dict[title] = shop_dict[title] + number
             else:
-                shop_list[title] = number
-    for title, number in shop_list.items():
+                shop_dict[title] = number
+    filename = ('media/' + user.username + '.txt')
+    shop_file = open(filename, 'w')
+    for title, number in shop_dict.items():
         shop_file.write(' - ' + title + ': ' + str(number) + '\n')
     shop_file.close()
-    response = HttpResponse(open(filename), content_type='application/txt')
+    response = HttpResponse(open(filename), content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
+    os.remove(filename)
     return response
+
+
+def page_not_found(request, exception):
+    return render(
+        request,
+        "misc/404.html",
+        {"path": request.path},
+        status=404
+    )
+
+
+def server_error(request):
+    return render(request, "misc/500.html", status=500)

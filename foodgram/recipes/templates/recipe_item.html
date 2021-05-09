@@ -1,6 +1,6 @@
 <div class="card" data-id="{{ recipe.id }}">
     {% load thumbnail %}
-    {% thumbnail recipe.image "1024x768" upscale=True as im %}
+    {% thumbnail recipe.image "361x241" crop="center" upscale=True as im %}
         <a href="{% url 'recipe' recipe.author.username recipe.id %}" class="link" target="_blank"><img src="{{ im.url }}" alt="{{ recipe.title }}" class="card__image"></a>
     {% endthumbnail %}
     {% csrf_token %}

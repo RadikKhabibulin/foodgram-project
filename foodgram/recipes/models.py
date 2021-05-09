@@ -14,11 +14,14 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     unit = models.CharField(max_length=100)
 
     def __str__(self):
         return (self.name + ', ' + self.unit)
+
+    class Meta:
+        unique_together = ['name', 'unit']
 
 
 class Recipe(models.Model):
@@ -83,9 +86,7 @@ class Purchase(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='buyer'
     )
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE
-    )
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ['user', 'recipe']
