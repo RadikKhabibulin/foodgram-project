@@ -1,20 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Рецепты{% endblock %}
 {% load static %}
+{% load recipe_filters %}
 {% block content %}
 
     <link rel="stylesheet" href="{% static 'pages/index.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/single.css' %}">
     <div class="main__header">
         <h1 class="main__title">{{ profile.first_name }} {{ profile.last_name }}</h1>
         <ul class="tags">
-            {% include 'tags.html' with tags=tags url='profile' url_tag='profile_tag' username=username %}
+            {% include 'tags.html' with tags=tags url='profile' url_tag='profile_tag' username=profile.username %}
         </ul>
     </div>
     <h3 class="main__title" style="font-size: large; margin-top: -30px;">Опубликовано рецептов: {{ recipes_count }}</h3>
-    <div class="author-subscribe" data-author="{{ username }}">
-        {% if user.is_authenticated and user.username != username %}
+    <div class="author-subscribe" data-author="{{ profile.username }}">
+        {% if user.is_authenticated and user.username != profile.username %}
             {% csrf_token %}
-            {% if following %}
+            {% if user|get_following:profile %}
                 <p style="padding: 0 0 2em 0;"><button class="button button_style_light-blue button_size_subscribe" name="subscribe">Отписаться от автора</button></p>
             {% else %}
                 <p style="padding: 0 0 2em 0;"><button class="button button_style_light-blue button_size_subscribe" name="subscribe" data-out>Подписаться на автора</button></p>
@@ -23,12 +25,12 @@
     </div>
     <div class="card-list">
         {% for recipe in page %}
-            {% include "recipe_item.html" with recipe=recipe param_dict=param_dict %}
+            {% include "recipe_item.html" with recipe=recipe %}
         {% endfor %}
     </div>
 
     {% if page.has_other_pages %}
-        {% include "paginator.html" with items=page paginator=paginator%}
+        {% include "paginator.html" with items=page paginator=paginator %}
     {% endif %}
 
     <script src="{% static 'js/components/MainCards.js' %}"></script>

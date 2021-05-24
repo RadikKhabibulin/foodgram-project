@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Рецепты{% endblock %}
+{% block title %}Избранное{% endblock %}
 {% load static %}
 {% block content %}
 
     <div class="main__header">
-        <h1 class="main__title">Рецепты</h1>
-        {% include "tags.html" with tags=tags url='index' url_tag='index_tag' %}
+        <h1 class="main__title">Избранное</h1>
+        {% include "tags.html" with tags=tags url='favorites' url_tag='favorites_tag' %}
     </div>
     <div class="card-list">
         {% for recipe in page %}
@@ -13,9 +13,8 @@
         {% endfor %}
     </div>
     {% if page.has_other_pages %}
-        {% include "paginator.html" with items=page paginator=paginator %}
+        {% include "paginator.html" with items=page paginator=paginator%}
     {% endif %}
-    
 
     <script src="{% static 'js/components/MainCards.js' %}"></script>
 

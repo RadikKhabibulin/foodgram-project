@@ -19,9 +19,10 @@
                     <li class="nav__item"><a href="{% url 'logout' %}" onclick="return confirm('Выйти из аккаунта?') ? true : false;" class="nav__link link">Выход</a></li>
                 {% else %}
                     <li class="nav__item" id="Войти на сайт"><a href="{% url 'login' %}" class="nav__link link">Войти</a></li>
-                    <li class="nav__item"><a href="{% url 'signup' %}" class="button button_style_blue"style="padding-top:15px" >Создать аккаунт</a></li>
+                    <li class="nav__item"><a href="{% url 'signup' %}" class="button button_style_blue"style="padding-top:15px">Создать аккаунт</a></li>
                 {% endif %}
             </ul>
+            <!-- Подсветка пункта текущей страницы -->
             <script>
                 var title_name = document.getElementsByTagName('title')[0].text;
                 if (document.getElementById(title_name)){

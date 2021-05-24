@@ -1,7 +1,7 @@
 {% load recipe_filters %}
 
 <ul class="tags">
-    {% if tags %}
+    {% if tags != 'empty' %}
         <li class="tags__item"><a href="{% if username %} {% url url username %} {% else %} {% url url %} {% endif %}" class="nav__link link">Сбросить фильтр</a></li>
         <li class="tags__item">
             {% if 'breakfast' in tags %}

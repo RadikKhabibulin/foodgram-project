@@ -7,12 +7,15 @@
     <div class="main__header">
         <h1 class="main__title">Список покупок</h1>
     </div>
+
     {% if recipes|length < 1 %}
         <p class="recipe__text">Вы пока не добавили рецепты в список покупок</p>
     {% endif %}
+    
     {% csrf_token %}
     <div class="card-list card-list_column">
         <ul class="shopping-list">
+
             {% for recipe in recipes %}
             <li class="shopping-list__item" data-id="{{recipe.id}}">
                 <div class="recipe recipe_reverse">
@@ -26,13 +29,15 @@
                 <a href="#" class="shopping-list__button link">Удалить</a>
             </li>
             {% endfor %}
+
         </ul>
         <a href="{% url 'upload_file' %}"><button class="button button_style_blue">Скачать список</button></a>
     </div>
 
-<script src="{% static 'js/config/config.js' %}"></script>
-<script src="{% static 'js/components/Header.js' %}"></script>
-<script src="{% static 'js/components/ShopList.js' %}"></script>
-<script src="{% static 'js/api/Api.js' %}"></script>
-<script src="{% static 'shopList.js' %}"></script>
+    <script src="{% static 'js/config/config.js' %}"></script>
+    <script src="{% static 'js/components/Header.js' %}"></script>
+    <script src="{% static 'js/components/ShopList.js' %}"></script>
+    <script src="{% static 'js/api/Api.js' %}"></script>
+    <script src="{% static 'shopList.js' %}"></script>
+
 {% endblock %}

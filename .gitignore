@@ -34,6 +34,7 @@ recipes/static/
 recipes/migrations/
 users/static/
 users/migrations/
+nginx/
 entrypoint.sh
 fixtures.json
 Dockerfile

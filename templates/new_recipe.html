@@ -9,16 +9,15 @@
         <h1 class="main__title">{% if recipe.id %}Редактирование рецепта{% else %}Создание рецепта{% endif %}</h1>
     </div>
     <div class="form-container">
-        {% if form.errors %}
+        <!-- {% if form.errors %}
             {% for error in form.errors %}
               <div class="alert alert-danger" role="alert">
                   {{ error|escape }}
               </div>
             {% endfor %}
-          {% endif %}  
+          {% endif %}   -->
         <form class="form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-
             <div class="form__group">
                 <label for="id_name" class="form__label">Название рецепта</label>
                 <div class="form__field-group">
@@ -34,6 +33,7 @@
                     <div class="tags">
                         <div class="tags__item">
                             <input type="checkbox" name="breakfast" id="id_breakfast" class="tags__checkbox tags__checkbox_style_orange"
+                            
                             {% for tag in tags %}
                                 {% if tag.slug == 'breakfast' %}
                                     checked
@@ -61,10 +61,8 @@
                             <label for="id_dinner" class="tags__label">Ужин</label>
                         </div>
                     </div>
-                    {% for error in errors %}
-                        {% if error == 'Не выбраны теги!' %}
-                            <span class="form__error">{{ error }}</span>
-                        {% endif %}
+                    {% for error in form.tags.errors %}
+                        <span class="form__error">{{ error }}</span>
                     {% endfor %}
                 </div>
             </div>
@@ -80,21 +78,22 @@
                         <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
                     </div>
                     <div class="form__field-group-ingredientes-container">
-                    {% if compositions %}
-                        {% for composition in compositions %}
-                            <div class="form__field-item-ingredient" id="ing_{{ forloop.counter }}"><span> {{composition.ingredient.name}} {{composition.number}} {{composition.ingredient.unit}}.</span> <span class="form__field-item-delete"></span>
-                                <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{composition.ingredient.name}}">
-                                <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{composition.number}}">
-                                <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{composition.ingredient.unit}}">
+                        {% for ingredient, value in compositions.items %}
+                            <div class="form__field-item-ingredient" id="ing_{{ forloop.counter }}"><span> {{ ingredient.name }} {{ value }} {{ ingredient.unit }}.</span> <span class="form__field-item-delete"></span>
+                                <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.name }}">
+                                <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{ value }}">
+                                <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.unit }}">
                             </div>
                         {% endfor %}
-                    {% endif %}
                     </div>
                     <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
-                    {% for error in errors %}
+                    <!-- {% for error in errors %}
                         {% if error == 'Не выбраны ингредиенты!' %}
                             <span class="form__error">{{ error }}</span>
                         {% endif %}
+                    {% endfor %} -->
+                    {% for error in form.ingredients.errors %}
+                        <span class="form__error">{{ error }}</span>
                     {% endfor %}
                 </div>
             </div>
@@ -139,7 +138,7 @@
             <div class="form__footer">
                 {% if recipe.id %}
                     <button type="submit" class="button button_style_blue">Сохранить</button>
-                    <a style="margin-left: 2.5em" href="{% url 'recipe_del' recipe.author.username recipe.id%}" onclick="return confirm('Удалить рецепт?') ? true : false;" class="form__ingredient-link">Удалить</a>
+                    <a style="margin-left: 2.5em" href="{% url 'recipe_del' recipe.author.username recipe.id %}" onclick="return confirm('Удалить рецепт?') ? true : false;" class="form__ingredient-link">Удалить</a>
                 {% else %}
                     <button type="submit" class="button button_style_blue">Создать рецепт</button>
                 {% endif %}

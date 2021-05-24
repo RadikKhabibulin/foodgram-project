@@ -1,9 +1,7 @@
 from django.contrib import admin
 
-from .models import (
-    Ingredient, Tag, Recipe, Composition,
-    Follow, Favorite, Purchase
-)
+from .models import (Composition, Favorite, Follow, Ingredient, Purchase,
+                     Recipe, Tag)
 
 
 class CompositionInline(admin.TabularInline):
@@ -31,7 +29,7 @@ admin.site.register(Ingredient, IngredientAdmin)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('title', 'author',)
     search_fields = ('title',)
-    list_filter = ('title', 'author', 'tag',)
+    list_filter = ('title', 'author', 'tags',)
     inlines = (CompositionInline,)
 
 

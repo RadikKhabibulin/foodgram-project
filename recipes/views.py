@@ -1,134 +1,60 @@
-import os
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import (
-    render,
-    get_object_or_404,
-    redirect,
-    get_list_or_404,
-)
-from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
+                              render)
 
+from foodgram.settings import PAGE_SIZE
 from .forms import RecipeForm
-from .models import (
-    Ingredient, Tag, Recipe, User,
-    Composition, Follow, Favorite, Purchase
-)
+from .models import Composition, Favorite, Follow, Purchase, Recipe, User
 
 
-def index(request):
-    user = request.user
-    recipe_list = Recipe.objects.all()
-    param_dict = get_param_dict(recipe_list, user)
-    paginator = Paginator(recipe_list, 6)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-    purchases_count = get_purchases_count(user)
-    return render(request, 'index.html', {
-            'page': page, 'param_dict': param_dict,
-            'paginator': paginator, 'purchases_count': purchases_count,
-        }
-    )
-
-
-def index_tag(request, tags):
+def index(request, tags='empty'):
     if tags == 'empty':
-        return redirect('index')
-    user = request.user
-    tags = tags.split('+')
-    recipe_list = Recipe.objects.filter(tag__slug__in=tags).distinct()
-    param_dict = get_param_dict(recipe_list, user)
-    paginator = Paginator(recipe_list, 6)
+        recipe_list = Recipe.objects.all()
+    else:
+        tags = tags.split('+')
+        recipe_list = Recipe.objects.filter(tags__slug__in=tags).distinct()
+        tags = '+'.join(tags)
+    paginator = Paginator(recipe_list, PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    tags = '+'.join(tags)
-    purchases_count = get_purchases_count(user)
     return render(request, 'index.html', {
-            'page': page, 'param_dict': param_dict,
-            'paginator': paginator, 'tags': tags,
-            'purchases_count': purchases_count
+            'page': page,
+            'tags': tags, 'paginator': paginator,
         }
     )
 
 
 def recipe_view(request, username, recipe_id):
-    user = request.user
     recipe = get_object_or_404(
-        Recipe,
-        id=recipe_id,
+        Recipe, id=recipe_id,
         author_id__username=username
     )
-    tags = recipe.tag.all()
     ingredients = get_list_or_404(Composition, recipe=recipe)
-    author = get_object_or_404(User, username=username)
-    if user.is_authenticated:
-        following = Follow.objects.filter(user=user, author=author).exists()
-        favorites = Favorite.objects.filter(user=user, recipe=recipe).exists()
-        purchases = Purchase.objects.filter(user=user, recipe=recipe).exists()
-        purchases_count = Purchase.objects.filter(user=user).count()
-        return render(request, 'recipe.html', {
-                'recipe': recipe, 'tags': tags,
-                'ingredients': ingredients, 'following': following,
-                'favorites': favorites, 'purchases': purchases,
-                'purchases_count': purchases_count
-            }
-        )
     return render(request, 'recipe.html', {
-            'recipe': recipe, 'tags': tags,
-            'ingredients': ingredients,
+            'recipe': recipe, 'ingredients': ingredients,
         }
     )
 
 
-def profile(request, username):
-    user = request.user
+def profile(request, username, tags='empty'):
     profile = get_object_or_404(User, username=username)
-    recipe_list = profile.recipes.all()
-    param_dict = get_param_dict(recipe_list, user)
-    paginator = Paginator(recipe_list, 6)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-    recipes_count = profile.recipes.count()
-    following = (
-        user.is_authenticated and
-        Follow.objects.filter(user=user, author=profile).exists()
-    )
-    purchases_count = get_purchases_count(user)
-
-    return render(request, 'profile.html', {
-            'profile': profile, 'page': page,
-            'paginator': paginator, 'param_dict': param_dict,
-            'username': username, 'recipes_count': recipes_count,
-            'following': following, 'purchases_count': purchases_count
-        }
-    )
-
-
-def profile_tag(request, username, tags):
     if tags == 'empty':
-        return redirect('profile', username=username)
-    user = request.user
-    tags = tags.split('+')
-    profile = get_object_or_404(User, username=username)
-    recipe_list = Recipe.objects.filter(
-        tag__slug__in=tags, author=profile).distinct()
-    param_dict = get_param_dict(recipe_list, user)
-    paginator = Paginator(recipe_list, 6)
+        recipes = profile.recipes.all()
+    else:
+        tags = tags.split('+')
+        recipes = profile.recipes.filter(
+            tags__slug__in=tags, author=profile).distinct()
+        tags = '+'.join(tags)
+    paginator = Paginator(recipes, PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     recipes_count = profile.recipes.count()
-    purchases_count = get_purchases_count(user)
-    following = (
-        user.is_authenticated and
-        Follow.objects.filter(user=user, author=profile).exists()
-    )
-    tags = '+'.join(tags)
     return render(request, 'profile.html', {
             'profile': profile, 'page': page,
-            'paginator': paginator, 'param_dict': param_dict,
-            'tags': tags, 'username': username,
-            'recipes_count': recipes_count, 'following': following,
-            'purchases_count': purchases_count,
+            'paginator': paginator, 'tags': tags,
+            'recipes_count': recipes_count,
         }
     )
 
@@ -137,32 +63,28 @@ def profile_tag(request, username, tags):
 def new_recipe(request):
     user = request.user
     form = RecipeForm(request.POST or None, files=request.FILES or None)
-    purchases_count = Purchase.objects.filter(user=user).count()
     if form.is_valid():
         new_recipe = form.save(commit=False)
         new_recipe.author = user
-        new_compositions, new_tags = request_parsing(new_recipe, request)
-        errors = []
-        if len(new_tags) == 0:
-            errors.append('Не выбраны теги!')
-        if len(new_compositions) == 0:
-            errors.append('Не выбраны ингредиенты!')
-        if len(errors) > 0:
-            return render(
-                request, 'new_recipe.html', {
-                    'form': form, 'compositions': new_compositions,
-                    'tags': new_tags, 'errors': errors,
-                    'purchases_count': purchases_count,
-                }
-            )
         new_recipe.save()
-        for composition in new_compositions:
+        for ingredient, value in form.cleaned_data['ingredients']:
+            composition, created = Composition.objects.get_or_create(
+                    ingredient=ingredient,
+                    number=value, recipe=new_recipe
+                )
             composition.save()
-        for tag in new_tags:
-            new_recipe.tag.add(tag)
+        for tag in form.cleaned_data['tags']:
+            new_recipe.tags.add(tag)
         return redirect('index')
+    tags = []
+    compositions = {}
+    if request.method == 'POST':
+        if not form['tags'].errors:
+            tags = form.clean_tags(edit=True)
+        if not form['ingredients'].errors:
+            compositions = form.clean_ingredients(edit=True)
     return render(request, 'new_recipe.html', {
-            'form': form, 'purchases_count': purchases_count,
+            'form': form, 'tags': tags, 'compositions': compositions
         }
     )
 
@@ -170,54 +92,45 @@ def new_recipe(request):
 @login_required
 def recipe_edit(request, username, recipe_id):
     user = request.user
-    purchases_count = Purchase.objects.filter(user=user).count()
     editable_recipe = get_object_or_404(
         Recipe, id=recipe_id, author_id__username=username
     )
-    compositions = get_list_or_404(
+    compositions = {}
+    compositions_list = get_list_or_404(
         Composition, recipe__id=editable_recipe.id
     )
-    tags = editable_recipe.tag.all()
+    for obj in compositions_list:
+        compositions[obj.ingredient] = obj.number
+    tags = editable_recipe.tags.all()
     if user != editable_recipe.author:
         return recipe_view(request, username, recipe_id)
     form = RecipeForm(
         request.POST or None, files=request.FILES or None,
         instance=editable_recipe
     )
+    file_url = None
     if form.initial['image']:
         file_url = form.initial['image'].url
-    else:
-        file_url = None
     if form.is_valid():
         new_recipe = form.save(commit=False)
-        new_compositions, new_tags = request_parsing(
-            new_recipe, request, edit=True)
-        errors = []
-        if len(new_tags) == 0:
-            errors.append('Не выбраны теги!')
-        if len(new_compositions) == 0:
-            errors.append('Не выбраны ингредиенты!')
-        if len(errors) > 0:
-            return render(request, 'new_recipe.html', {
-                    'form': form, 'compositions': new_compositions,
-                    'tags': new_tags, 'errors': errors,
-                    'purchases_count': purchases_count, 'file_url': file_url,
-                }
-            )
         new_recipe.save()
-        new_recipe.tag.clear()
-        for composition in compositions:
+        new_recipe.tags.clear()
+        for composition in compositions_list:
             composition.delete()
-        for composition in new_compositions:
+        for ingredient, value in form.cleaned_data['ingredients'].items():
+            composition, created = Composition.objects.get_or_create(
+                    ingredient=ingredient,
+                    number=value, recipe=new_recipe
+                )
             composition.save()
-        for tag in new_tags:
-            new_recipe.tag.add(tag)
+        for tag in form.cleaned_data['tags']:
+            new_recipe.tags.add(tag)
         return redirect('recipe', username=username, recipe_id=recipe_id)
     return render(request, 'new_recipe.html', {
             'form': form, 'recipe_id': recipe_id,
             'username': username, 'recipe': editable_recipe,
             'compositions': compositions, 'tags': tags,
-            'purchases_count': purchases_count, 'file_url': file_url,
+            'file_url': file_url,
         }
     )
 
@@ -235,7 +148,6 @@ def recipe_del(request, username, recipe_id):
 @login_required
 def follow_index(request):
     user = request.user
-    purchases_count = Purchase.objects.filter(user=user).count()
     following = Follow.objects.filter(user=user)
     recipe_dict = {}
     for follow in following:
@@ -252,12 +164,12 @@ def follow_index(request):
             else:
                 recipe_list.append(str(new_count) + ' рецептов')
         recipe_dict[follow.author] = recipe_list
-    paginator = Paginator(following, 6)
+    paginator = Paginator(following, PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     return render(request, 'follow.html', {
             'page': page, 'paginator': paginator,
-            'recipe_dict': recipe_dict, 'purchases_count': purchases_count,
+            'recipe_dict': recipe_dict,
         }
     )
 
@@ -266,86 +178,57 @@ def follow_index(request):
 def profile_follow(request, username):
     user = request.user
     author = get_object_or_404(User, username=username)
-    following = Follow.objects.filter(user=user, author=author).exists()
-    if user != author and following is False:
-        Follow.objects.create(user=user, author=author)
-        return JsonResponse({'success': 'true'}, safe=False)
-    return JsonResponse({'success': 'false'}, safe=False)
+    if user != author:
+        obj, created = Follow.objects.get_or_create(user=user, author=author)
+        return JsonResponse({'success': created}, safe=False)
+    return JsonResponse({'success': False}, safe=False)
 
 
 @login_required
 def profile_unfollow(request, username):
     user = request.user
     author = get_object_or_404(User, username=username)
-    if Follow.objects.filter(user=user, author=author).exists():
-        unfollow = Follow.objects.filter(user=user, author=author)
-        unfollow.delete()
-        return JsonResponse({'success': 'true'}, safe=False)
-    return JsonResponse({'success': 'false'}, safe=False)
+    obj, deleted = Follow.objects.filter(user=user, author=author).delete()
+    if deleted:
+        return JsonResponse({'success': True}, safe=False)
+    return JsonResponse({'success': False}, safe=False)
 
 
 @login_required
 def add_favorites(request, recipe_id):
     user = request.user
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    if Favorite.objects.filter(user=user, recipe=recipe).exists() is False:
-        Favorite.objects.create(user=user, recipe=recipe)
-        return JsonResponse({'success': 'true'}, safe=False)
-    return JsonResponse({'success': 'false'}, safe=False)
+    obj, created = Favorite.objects.get_or_create(user=user, recipe=recipe)
+    return JsonResponse({'success': created}, safe=False)
 
 
 @login_required
 def del_favorites(request, recipe_id):
     user = request.user
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    if Favorite.objects.filter(user=user, recipe=recipe).exists():
-        del_favorite = Favorite.objects.filter(user=user, recipe=recipe)
-        del_favorite.delete()
-        return JsonResponse({'success': 'true'}, safe=False)
-    return JsonResponse({'success': 'false'}, safe=False)
+    obj, deleted = Favorite.objects.filter(user=user, recipe=recipe).delete()
+    if deleted:
+        return JsonResponse({'success': True}, safe=False)
+    return JsonResponse({'success': False}, safe=False)
 
 
 @login_required
-def favorites(request):
+def favorites(request, tags='empty'):
     user = request.user
     favorites = user.reader.all()
-    recipes = [item.recipe for item in favorites]
-    recipes.reverse()
-    param_dict = get_param_dict(recipes, user)
-    purchases_count = Purchase.objects.filter(user=user).count()
-    paginator = Paginator(recipes, 6)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-    return render(request, 'favorites.html', {
-            'page': page, 'paginator': paginator,
-            'param_dict': param_dict, 'purchases_count': purchases_count,
-        }
-    )
-
-
-@login_required
-def favorites_tag(request, tags):
+    recipes_id = list(favorites.values_list('recipe', flat=True))
     if tags == 'empty':
-        return redirect('favorites')
-    user = request.user
-    tags = tags.split('+')
-    favorites = user.reader.all()
-    recipes = []
-    for item in favorites:
-        for elem in item.recipe.tag.all():
-            if elem.slug in tags and item.recipe not in recipes:
-                recipes.append(item.recipe)
-    recipes.reverse()
-    param_dict = get_param_dict(recipes, user)
-    purchases_count = Purchase.objects.filter(user=user).count()
-    paginator = Paginator(recipes, 6)
+        recipes = Recipe.objects.filter(id__in=recipes_id).distinct()
+    else:
+        tags = tags.split('+')
+        recipes = Recipe.objects.filter(
+            tags__slug__in=tags, id__in=recipes_id).distinct()
+        tags = '+'.join(tags)
+    paginator = Paginator(recipes, PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    tags = '+'.join(tags)
     return render(request, 'favorites.html', {
-            'page': page, 'paginator': paginator,
-            'param_dict': param_dict, 'tags': tags,
-            'purchases_count': purchases_count,
+            'page': page, 'paginator': paginator, 'tags': tags,
         }
     )
 
@@ -354,153 +237,24 @@ def favorites_tag(request, tags):
 def purchases(request):
     user = request.user
     purchases = user.buyer.all()
-    recipes = [item.recipe for item in purchases]
-    purchases_count = Purchase.objects.filter(user=user).count()
-    return render(request, 'shop_list.html', {
-            'recipes': recipes, 'purchases_count': purchases_count,
-        }
-    )
+    recipes_id = list(purchases.values_list('recipe', flat=True))
+    recipes = Recipe.objects.filter(id__in=recipes_id).distinct()
+    return render(request, 'shop_list.html', {'recipes': recipes})
 
 
 @login_required
 def add_purchases(request, recipe_id):
     user = request.user
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    if Purchase.objects.filter(user=user, recipe=recipe).exists() is False:
-        Purchase.objects.create(user=user, recipe=recipe)
-        return JsonResponse({'success': 'true'}, safe=False)
-    return JsonResponse({'success': 'false'}, safe=False)
+    obj, created = Purchase.objects.get_or_create(user=user, recipe=recipe)
+    return JsonResponse({'success': created}, safe=False)
 
 
 @login_required
 def del_purchases(request, recipe_id):
     user = request.user
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    if Purchase.objects.filter(user=user, recipe=recipe).exists():
-        del_purchase = Purchase.objects.filter(user=user, recipe=recipe)
-        del_purchase.delete()
-        return JsonResponse({'success': 'true'}, safe=False)
-    return JsonResponse({'success': 'false'}, safe=False)
-
-
-def request_parsing(new_recipe, request, edit=False):
-    variables = request.POST
-    name_ingredient = 'nameIngredient_'
-    value_ingredient = 'valueIngredient_'
-    units_ingredient = 'unitsIngredient_'
-    tag_slugs = ['breakfast', 'lunch', 'dinner']
-    new_tags = []
-    new_compositions = []
-    for item in variables:
-        if name_ingredient in item:
-            name = request.POST.get(
-                name_ingredient + item[len(name_ingredient):]
-            )
-            unit = request.POST.get(
-                units_ingredient + item[len(name_ingredient):]
-            )
-            value = request.POST.get(
-                value_ingredient + item[len(name_ingredient):]
-            )
-            ingredient = Ingredient.objects.filter(
-                name=name, unit=unit
-            ).exists()
-            if ingredient:
-                ingredient = get_object_or_404(
-                    Ingredient, name=name, unit=unit
-                )
-                if edit:
-                    composition, created = Composition.objects.get_or_create(
-                        ingredient=ingredient,
-                        number=value, recipe=new_recipe
-                    )
-                else:
-                    composition = Composition(
-                        ingredient=ingredient,
-                        number=value, recipe=new_recipe
-                    )
-                new_compositions.append(composition)
-        if item in tag_slugs:
-            new_tag = get_object_or_404(Tag, slug=item)
-            new_tags.append(new_tag)
-    return new_compositions, new_tags
-
-
-def add_ingredient(request):
-    ingredients = get_list_or_404(Ingredient)
-    search_name = request.GET.get('query')
-    data = []
-    for item in ingredients:
-        if search_name.lower() in item.name.lower():
-            ingredient = {'title': item.name, 'dimension': item.unit}
-            data.append(ingredient)
-    if len(data) == 0:
-        for item in ingredients:
-            ingredient = {'title': item.name, 'dimension': item.unit}
-            data.append(ingredient)
-    return JsonResponse(data, safe=False)
-
-
-def get_purchases_count(user):
-    if user.is_authenticated:
-        purchases_count = Purchase.objects.filter(user=user).count()
-    else:
-        purchases_count = False
-    return purchases_count
-
-
-def get_param_dict(recipes, user):
-    param_dict = {}
-    for recipe in recipes:
-        param_list = []
-        for tag in recipe.tag.all():
-            param_list.append(tag.name)
-        if user.is_authenticated:
-            if Favorite.objects.filter(recipe=recipe, user=user).exists():
-                param_list.append('del-favorites')
-            else:
-                param_list.append('add-favorites')
-            if Purchase.objects.filter(recipe=recipe, user=user).exists():
-                param_list.append('del-purchases')
-            else:
-                param_list.append('add-purchases')
-        param_dict[recipe.id] = param_list
-    return param_dict
-
-
-def upload_file(request):
-    user = request.user
-    purchases = user.buyer.all()
-    recipes = [item.recipe for item in purchases]
-    shop_dict = {}
-    for recipe in recipes:
-        compositions = Composition.objects.filter(recipe=recipe)
-        for item in compositions:
-            title = (item.ingredient.name + ' (' + item.ingredient.unit + ')')
-            number = item.number
-            if title in shop_dict.keys():
-                shop_dict[title] = shop_dict[title] + number
-            else:
-                shop_dict[title] = number
-    filename = ('media/' + user.username + '.txt')
-    shop_file = open(filename, 'w')
-    for title, number in shop_dict.items():
-        shop_file.write(' - ' + title + ': ' + str(number) + '\n')
-    shop_file.close()
-    response = HttpResponse(open(filename), content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
-    os.remove(filename)
-    return response
-
-
-def page_not_found(request, exception):
-    return render(
-        request,
-        "misc/404.html",
-        {"path": request.path},
-        status=404
-    )
-
-
-def server_error(request):
-    return render(request, "misc/500.html", status=500)
+    obj, deleted = Purchase.objects.filter(user=user, recipe=recipe).delete()
+    if deleted:
+        return JsonResponse({'success': True}, safe=False)
+    return JsonResponse({'success': False}, safe=False)
