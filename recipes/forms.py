@@ -47,8 +47,13 @@ class RecipeForm(ModelForm):
             raise forms.ValidationError('Не выбраны теги!')
         return tags
 
-
-class CompositionForm(ModelForm):
-    class Meta:
-        model = Composition
-        fields = ('ingredient', 'number',)
+    def add_ingredients_and_tags(self, new_recipe):
+        new_recipe.save()
+        for ingredient, value in self.cleaned_data['ingredients'].items():
+            composition, _ = Composition.objects.get_or_create(
+                    ingredient=ingredient,
+                    number=value, recipe=new_recipe
+                )
+            composition.save()
+        for tag in self.cleaned_data['tags']:
+            new_recipe.tags.add(tag)

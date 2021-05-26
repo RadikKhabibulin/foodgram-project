@@ -11,12 +11,12 @@ class Tag(models.Model):
     )
     slug = models.CharField(max_length=100, unique=True, verbose_name='slug')
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'Теги для рецепта'
         verbose_name_plural = 'Теги для рецепта'
+
+    def __str__(self):
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -29,9 +29,6 @@ class Ingredient(models.Model):
         verbose_name='единица измерения'
     )
 
-    def __str__(self):
-        return (self.name + ', ' + self.unit)
-
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -41,6 +38,9 @@ class Ingredient(models.Model):
         ]
         verbose_name = 'Ингредиенты'
         verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return (self.name + ', ' + self.unit)
 
 
 class Recipe(models.Model):

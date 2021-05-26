@@ -9,13 +9,6 @@
         <h1 class="main__title">{% if recipe.id %}Редактирование рецепта{% else %}Создание рецепта{% endif %}</h1>
     </div>
     <div class="form-container">
-        <!-- {% if form.errors %}
-            {% for error in form.errors %}
-              <div class="alert alert-danger" role="alert">
-                  {{ error|escape }}
-              </div>
-            {% endfor %}
-          {% endif %}   -->
         <form class="form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form__group">
@@ -87,11 +80,6 @@
                         {% endfor %}
                     </div>
                     <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
-                    <!-- {% for error in errors %}
-                        {% if error == 'Не выбраны ингредиенты!' %}
-                            <span class="form__error">{{ error }}</span>
-                        {% endif %}
-                    {% endfor %} -->
                     {% for error in form.ingredients.errors %}
                         <span class="form__error">{{ error }}</span>
                     {% endfor %}
@@ -121,12 +109,12 @@
                 <div class="form__field-group" id="image_field">
                     {% if file_url %}
                         <input type="checkbox" name="image-clear" style="display: none;" id="image-clear_id">
-                        <img id="blah" src="{{ file_url }}" alt="your image" width="50" height="50" style="display: inline-block; margin-left: 200px; position: absolute;"/>
+                        <img id="image-src" src="{{ file_url }}" alt="your image" width="50" height="50" style="display: inline-block; margin-left: 200px; position: absolute;"/>
                         <label for="image-clear_id" class="form__field-item-delete" id="del-image" style="margin-left: 260px; position: absolute;" onclick="del_image()"></label>
                         <input type="file" name="image" accept="image/*" class="form__file" id="id_image">
                     {% else %}
                         {{ form.image|addclass:"form__file" }}
-                        <img id="blah" src="#" alt="your image" width="50" height="50" style="display: none; margin-left: 200px; position: absolute;"/>
+                        <img id="image-src" src="#" alt="your image" width="50" height="50" style="display: none; margin-left: 200px; position: absolute;"/>
                         <span class="form__field-item-delete" id="del-image" style="display: none; margin-left: 260px; position: absolute;" onclick="del_image()"></span>
                     {% endif %}
                     <label for="id_image" class="form__file-button">Выбрать файл</label>
@@ -160,16 +148,15 @@
             var reader = new FileReader();
             
             reader.onload = function(e) {
-            console.log(e.target.result)
-            document.getElementById('blah').src=e.target.result;
-            document.getElementById('blah').style.display = 'inline-block';
+            document.getElementById('image-src').src=e.target.result;
+            document.getElementById('image-src').style.display = 'inline-block';
             document.getElementById('del-image').style.display = 'inline-block';
             }
             
             reader.readAsDataURL(input.files[0]); // convert to base64 string
         }
         else {
-            document.getElementById('blah').style.display = 'none';
+            document.getElementById('image-src').style.display = 'none';
             document.getElementById('del-image').style.display = 'none';
         }
     }
@@ -178,11 +165,10 @@
         readURL(this);
     });
 
-    function del_image(){
-        console.log('click')
+    function del_image() {
         var input=document.getElementById("id_image");
         input.value = '';
-        document.getElementById('blah').style.display = 'none';
+        document.getElementById('image-src').style.display = 'none';
         document.getElementById('del-image').style.display = 'none';
     }
 </script>

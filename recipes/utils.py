@@ -34,3 +34,8 @@ def upload_file(request):
     response = HttpResponse(shop_file, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
     return response
+
+
+def recipes_by_tag(tags, recipes):
+    tags = tags.split('+')
+    return recipes.filter(tags__slug__in=tags).distinct()
