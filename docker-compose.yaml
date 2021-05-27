@@ -1,0 +1,44 @@
+version: '3.3'
+
+volumes:
+  postgres_data:
+  django_static:
+  django_media:
+  nginx:
+
+services:
+  db:
+    image: postgres:12.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  web:
+    build: .
+    # image: radikkhabibulin/yamdb_final_web
+    volumes: 
+      - django_static:/code/static/
+      - django_media:/code/media/
+      - nginx:/code/nginx/
+    restart: always
+    ports:
+      - "5002:5002"
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+
+  nginx:
+    image: nginx:1.19.8-alpine
+    restart: always
+    volumes:
+      - django_static:/static/
+      - django_media:/media/
+      - nginx:/etc/nginx/conf.d/
+    ports: 
+      - "5003:5003"
+    depends_on: 
+      - web
+    env_file:
+      - ./.env
