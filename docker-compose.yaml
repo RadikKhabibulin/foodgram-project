@@ -15,8 +15,7 @@ services:
       - ./.env
 
   web:
-    build: .
-    # image: radikkhabibulin/yamdb_final_web
+    image: radikkhabibulin/foodgram_web
     volumes: 
       - django_static:/code/static/
       - django_media:/code/media/
