@@ -1,4 +1,4 @@
-![foodgram_workflow.yml](https://github.com/radikkhabibulin/foodgram_project/actions/workflows/foodgram_workflow.yml/badge.svg)
+![foodgram_workflow.yml](https://github.com/radikkhabibulin/foodgram-project/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 # Foodgram
 
