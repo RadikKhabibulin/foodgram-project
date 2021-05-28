@@ -40,7 +40,7 @@ EMAIL_HOST_PASSWORD = <email app password>
 
 2. Create an image and run the containers with the command:
 ```
-docker-compose up
+docker-compose up -d
 ```
 
 ## Create a superuser in database container
