@@ -1,5 +1,10 @@
 sleep 10
+
 echo run migrate
+cd recipes
+mkdir migrations
+cd migrations
+python manage.py makemigrations
 python manage.py migrate
 
 echo run loaddata
