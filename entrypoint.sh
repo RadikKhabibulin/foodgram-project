@@ -4,6 +4,8 @@ echo run migrate
 cd recipes
 mkdir migrations
 cd migrations
+touch __init__.py
+cd /code
 python manage.py makemigrations
 python manage.py migrate
 
