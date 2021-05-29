@@ -24,6 +24,10 @@ class RecipeForm(ModelForm):
                 len_of_name = len(name_ingredient)
                 unit = data.get(units_ingredient + item[len_of_name:])
                 value = data.get(value_ingredient + item[len_of_name:])
+                if value <= 0:
+                    raise forms.ValidationError(
+                        'Количество ингредиента не может быть меньше 0!'
+                        )
                 ingredient = Ingredient.objects.filter(
                     name=name, unit=unit).exists()
                 if ingredient:

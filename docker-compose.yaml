@@ -21,8 +21,6 @@ services:
       - django_media:/code/media/
       - nginx:/code/nginx/
     restart: always
-    ports:
-      - "5002:5002"
     depends_on:
       - db
     env_file:
