@@ -4,7 +4,6 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
                               render)
-from django.contrib.sites.shortcuts import get_current_site
 
 from foodgram.settings import PAGE_SIZE
 from .forms import RecipeForm
@@ -18,9 +17,7 @@ def index(request, tags='empty'):
     paginator = Paginator(recipes, PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    domain = get_current_site(request)
     return render(request, 'index.html', {
-            'domain': domain,
             'page': page,
             'tags': tags, 'paginator': paginator,
         }

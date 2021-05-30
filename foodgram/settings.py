@@ -10,6 +10,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     '*',
+    '217.28.228.95',
     'localhost',
     '127.0.0.1',
     '[::1]',

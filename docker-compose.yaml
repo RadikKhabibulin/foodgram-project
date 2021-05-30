@@ -34,7 +34,7 @@ services:
       - django_media:/media/
       - nginx:/etc/nginx/conf.d/
     ports: 
-      - "5003:5003"
+      - "80:80"
     depends_on: 
       - web
     env_file:
