@@ -4,7 +4,7 @@
 {% block content %}
 
     <div class="main__header">
-        <h1 class="main__title">Рецепты</h1>
+        <h1 class="main__title">Рецепты {{ domain }}</h1>
         {% include "tags.html" with tags=tags url='index' url_tag='index_tag' %}
     </div>
     <div class="card-list">
