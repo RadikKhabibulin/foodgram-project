@@ -1,10 +1,13 @@
-from foodgram.settings import DEFAULT_FROM_EMAIL
+from foodgram.settings import (
+    DEFAULT_FROM_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_PASSWORD
+)
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.core.mail import send_mail, BadHeaderError
 from .forms import CreationForm, EmailForm
+import smtplib
 
 
 class SignUp(CreateView):
@@ -13,15 +16,34 @@ class SignUp(CreateView):
     template_name = 'signup.html'
 
 
+def send(subject, mesage, to_email):
+    """
+    Send an email
+    """
+
+    BODY = "\r\n".join((
+        "From: %s" % DEFAULT_FROM_EMAIL,
+        "To: %s" % to_email,
+        "Subject: %s" % subject,
+        "",
+        mesage
+    )).encode('utf-8')
+
+    server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+    server.starttls()
+    server.login(DEFAULT_FROM_EMAIL, EMAIL_HOST_PASSWORD)
+    server.sendmail(DEFAULT_FROM_EMAIL, [to_email], BODY)
+    server.quit()
+
+
 def send_my_mail(request):
     form = EmailForm(request.POST or None)
     if form.is_valid():
         subject = 'Смена пароля'
         to_email = 'radikkhabibulin@mail.ru'
-        message = 'ссылка на смену пароля'
+        message = 'ссылка'
         try:
-            send_mail(subject, message,
-                      DEFAULT_FROM_EMAIL, [to_email])
+            send(subject, message, [to_email])
         except BadHeaderError:
             return HttpResponse('Ошибка в теме письма.')
         return redirect('password_reset_done')
@@ -29,6 +51,7 @@ def send_my_mail(request):
             'form': form,
         }
     )
+
 
 # class PasswordReset(PasswordResetView):
 #     form_class = PasswordResetForm
