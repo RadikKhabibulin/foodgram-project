@@ -45,7 +45,6 @@ MIDDLEWARE = [
 
 INTERNAL_IPS = [
     '127.0.0.1',
-    '217.28.228.95',
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -123,7 +122,7 @@ LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL_G')
 EMAIL_HOST = os.environ.get('EMAIL_HOST_G')
 EMAIL_PORT = os.environ.get('EMAIL_PORT_G')
