@@ -20,7 +20,7 @@ def send_my_mail(request):
         to_email = 'radikkhabibulin@mail.ru'
         message = 'ссылка на смену пароля'
         try:
-            send_mail(f'{subject} от {to_email}', message,
+            send_mail(subject, message,
                       DEFAULT_FROM_EMAIL, [to_email])
         except BadHeaderError:
             return HttpResponse('Ошибка в теме письма.')
