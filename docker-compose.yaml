@@ -15,6 +15,7 @@ services:
       - ./.env
 
   web:
+    # build: .
     image: radikkhabibulin/foodgram_web
     volumes: 
       - django_static:/code/static/
