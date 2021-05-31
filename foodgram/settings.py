@@ -129,6 +129,7 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT_G')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER_G')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD_G')
 EMAIL_USE_TLS = True
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL_G')
 
 
 PAGE_SIZE = 6
