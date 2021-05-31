@@ -11,3 +11,7 @@ class CreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ('first_name', 'last_name', 'username', 'email')
+
+
+class EmailForm(forms.Form):
+    email = forms.EmailField(label='Адрес электронной почты', required=True)

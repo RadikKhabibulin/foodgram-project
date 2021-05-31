@@ -21,7 +21,7 @@ urlpatterns = [
 
     path(
         'password_reset/',
-        auth_views.PasswordResetView.as_view(),
+        views.send_my_mail,
         name='password_reset'
     ),
     path(
