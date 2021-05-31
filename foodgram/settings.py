@@ -45,6 +45,7 @@ MIDDLEWARE = [
 
 INTERNAL_IPS = [
     '127.0.0.1',
+    '217.28.228.95',
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
