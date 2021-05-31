@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from django.core.mail import send_mail, BadHeaderError
+from django.core.mail import BadHeaderError
 from .forms import CreationForm, EmailForm
 import smtplib
 
